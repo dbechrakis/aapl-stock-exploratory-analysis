@@ -1,86 +1,73 @@
-# AAPL Stock Forecasting Analysis
+# AAPL Stock Forecasting — Out-of-Sample Analysis
 
-An out-of-sample forecasting study of Apple (AAPL) daily closing prices across 2023–2024.
+A forecasting case study evaluating whether simple level, trend, and seasonal methods can produce useful long-horizon forecasts when only a short historical window is available for training.
 
-## Objective
+## Executive summary
 
-The project evaluates whether simple level, trend and seasonal forecasting methods can provide useful forecasts for the February–December portion of each year when the model is trained only on January observations.
+The analysis uses **AAPL daily closing prices from 2023–2024** and deliberately restricts the training data to January of each year. February–December is held out as an out-of-sample evaluation period.
 
-The analysis compares:
+This creates a practical forecasting question:
 
-- Naive forecasting
-- Moving Average forecasting
-- Simple Exponential Smoothing (SES)
-- Linear trend extrapolation
-- Linear trend + 21-trading-day seasonal adjustment
+> **Does a more complex forecasting method actually improve performance when the available training history is limited?**
 
-Forecast performance is evaluated with **Mean Absolute Deviation (MAD)** and **Mean Absolute Percentage Error (MAPE)**.
-
-## Forecasting Design
-
-For each year independently:
-
-1. Daily AAPL closing prices are cleaned and sorted chronologically.
-2. January observations form the training window.
-3. February–December observations are held out as the evaluation period.
-4. Model parameters are selected using only the January training data.
-5. Forecasts are generated for the full February–December horizon.
-6. MAD and MAPE are calculated against the held-out actual prices.
-
-The trend and seasonal components are estimated exclusively from January. This prevents future observations from influencing the forecast construction.
+The answer from this experiment is mostly **no**. Simple level-based methods were more competitive than trend-based approaches in both evaluation periods.
 
 ## Results
 
-| Year | Best method by MAD | MAD | MAPE |
+| Year | Best method | MAD | MAPE |
 |---|---|---:|---:|
 | 2023 | Naive | 31.56 | 17.62% |
 | 2024 | Moving Average (n=2) | 29.14 | 13.25% |
 
-The results show an important practical point: with only January available for training, more complex trend-based forecasts do not automatically outperform simple level-based baselines. The simple methods were more competitive in both evaluation periods.
-
-### Full model comparison
+### Full comparison
 
 | Year | Method | MAD | MAPE |
 |---|---|---:|---:|
 | 2023 | Naive | 31.56 | 17.62% |
 | 2023 | MA (n=2) | 32.20 | 17.98% |
-| 2023 | SES (alpha=0.9) | 31.66 | 17.67% |
+| 2023 | SES (α=0.9) | 31.66 | 17.67% |
 | 2023 | Linear Trend | 95.29 | 53.20% |
 | 2023 | Trend + Seasonal | 95.32 | 53.22% |
 | 2024 | Naive | 29.98 | 13.58% |
 | 2024 | MA (n=2) | 29.14 | 13.25% |
-| 2024 | SES (alpha=0.9) | 29.79 | 13.50% |
+| 2024 | SES (α=0.9) | 29.79 | 13.50% |
 | 2024 | Linear Trend | 35.75 | 17.42% |
 | 2024 | Trend + Seasonal | 35.78 | 17.44% |
 
-## Reference-Class Adjustment
+## Methodology
 
-The original coursework included a reference-class adjustment using ten comparable technology companies. The available project files do not contain the required external peer datasets, while the previous implementation generated synthetic peer series. That approach does not provide sufficient evidence for a defensible empirical claim.
+For each year independently:
 
-Rather than present synthetic results as real comparable-company evidence, the peer adjustment has been excluded from the final analytical workflow. The repository therefore focuses on the reproducible AAPL forecasting analysis that can be supported directly by the available data.
+1. Clean and sort daily observations.
+2. Use January as the training window.
+3. Hold February–December out for evaluation.
+4. Fit model parameters using January only.
+5. Generate forecasts across the evaluation horizon.
+6. Compare predictions with held-out actual prices using MAD and MAPE.
 
-## Project Structure
+The trend and seasonal components are therefore estimated without access to future observations, avoiding look-ahead leakage.
 
-```text
-aapl-stock-exploratory-analysis/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── notebooks/
-│   └── AAPL_Forecasting_Analysis.ipynb
-├── results/
-│   ├── 2023/
-│   ├── 2024/
-│   └── comparison/
-├── dataset_preprocessing.py
-├── main.py
-├── requirements.txt
-└── README.md
-```
+## Models evaluated
 
-## Reproducibility
+- Naive forecasting
+- Moving Average
+- Simple Exponential Smoothing
+- Linear trend extrapolation
+- Linear trend + 21-trading-day seasonal adjustment
 
-Create a virtual environment and install the dependencies:
+## Analytical takeaway
+
+The main insight is methodological rather than predictive: **model complexity did not guarantee better out-of-sample performance**.
+
+With a very short training window, simple baselines provided the strongest results. This is a useful reminder that forecasting choices should be validated against a realistic holdout period rather than selected because the model appears more sophisticated.
+
+## Reference-class adjustment
+
+An earlier version of the coursework included a peer-company reference-class adjustment. The required external peer datasets were not available in the final repository, and synthetic peer series do not provide sufficient evidence for a defensible empirical claim.
+
+That component has therefore been excluded from the final workflow.
+
+## Reproduce locally
 
 ```bash
 python -m venv .venv
@@ -92,7 +79,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Place the raw AAPL daily dataset at:
+Place the raw dataset at:
 
 ```text
 data/raw/AAPL_daily_2023_2024_raw.csv
@@ -105,13 +92,19 @@ python dataset_preprocessing.py
 python main.py
 ```
 
-The processed datasets are written to `data/processed/` and the forecast metrics, forecast tables and comparison outputs are written to `results/`.
-
 ## Limitations
 
-This is a compact forecasting exercise rather than a production trading system. The evaluation uses one training window per year and focuses on closing-price levels rather than returns, volatility or transaction costs. The 21-trading-day seasonal component is a deliberately simple approximation of a monthly trading cycle.
+This is a compact forecasting experiment, not a production trading system. It evaluates closing-price levels rather than returns or volatility, uses one training window per year, and uses a simple approximation for the seasonal component.
+
+## Tech stack
+
+**Python · pandas · NumPy · Matplotlib · Statistical Forecasting · Time-Series Analysis · Jupyter**
+
+## Context
+
+Portfolio forecasting case study developed during an MSc Data Science programme at **The American College of Greece**.
 
 ## Author
 
 **Dimitris Bechrakis**  
-M.Sc. Data Science — The American College of Greece
+Business & Data Analyst | M.Sc. Data Science
