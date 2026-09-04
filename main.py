@@ -9,8 +9,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy import stats
 
-PROCESSED = Path("data/processed")
-RESULTS = Path("results")
+ROOT = Path(__file__).resolve().parent
+PROCESSED = ROOT / "data/processed"
+RESULTS = ROOT / "results"
 for folder in ["2023", "2024", "comparison"]:
     (RESULTS / folder).mkdir(parents=True, exist_ok=True)
 
@@ -49,11 +50,15 @@ def ses_forecast(train, horizon, alpha):
 
 def choose_ma_window(train, candidates=range(2, 10)):
     best_window, best_error = None, np.inf
+    candidates = [w for w in candidates if w < len(train)]
+    if not candidates:
+        raise ValueError("Not enough training observations for moving-average tuning")
+    common_start = max(candidates)
     for window in candidates:
         if window >= len(train):
             continue
-        one_step = np.array([np.mean(train[i-window:i]) for i in range(window, len(train))])
-        error = mad(train[window:], one_step)
+        one_step = np.array([np.mean(train[i-window:i]) for i in range(common_start, len(train))])
+        error = mad(train[common_start:], one_step)
         if error < best_error:
             best_window, best_error = window, error
     return best_window
@@ -65,8 +70,8 @@ def choose_ses_alpha(train, candidates=np.linspace(0.1, 0.9, 9)):
         level = float(train[0])
         errors = []
         for value in train[1:]:
+            errors.append(abs(value - level))  # forecast before observing this value
             level = alpha * value + (1 - alpha) * level
-            errors.append(abs(value - level))
         error = float(np.mean(errors))
         if error < best_error:
             best_alpha, best_error = float(alpha), error
