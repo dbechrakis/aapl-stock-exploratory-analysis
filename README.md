@@ -1,5 +1,7 @@
 # AAPL Stock Forecasting — Out-of-Sample Analysis
 
+[![Evidence checks](https://github.com/dbechrakis/aapl-stock-exploratory-analysis/actions/workflows/evidence.yml/badge.svg)](https://github.com/dbechrakis/aapl-stock-exploratory-analysis/actions/workflows/evidence.yml)
+
 A forecasting case study evaluating whether simple level, trend, and seasonal methods can produce useful long-horizon forecasts when only a short historical window is available for training.
 
 ## Executive summary
@@ -94,3 +96,7 @@ Portfolio forecasting case study developed during an MSc Data Science programme 
 
 **Dimitris Bechrakis**  
 Business & Data Analyst | M.Sc. Data Science
+
+## Licensing
+
+See [licensing scope](LICENSING.md) for the MIT-licensed verification code and the separately governed project materials.
