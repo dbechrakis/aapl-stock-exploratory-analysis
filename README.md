@@ -10,29 +10,15 @@ This creates a practical forecasting question:
 
 > **Does a more complex forecasting method actually improve performance when the available training history is limited?**
 
-The answer from this experiment is mostly **no**. Simple level-based methods were more competitive than trend-based approaches in both evaluation periods.
+The earlier run favoured simple level-based methods. That ranking is provisional until the corrected workflow is rerun on the original source CSV.
 
-## Results
+## Validation status
 
-| Year | Best method | MAD | MAPE |
-|---|---|---:|---:|
-| 2023 | Naive | 31.56 | 17.62% |
-| 2024 | Moving Average (n=2) | 29.14 | 13.25% |
+**The historical MAD/MAPE table is withdrawn pending rerun.** The source Yahoo Finance CSV is not committed, so the previous numbers cannot be independently reproduced from this checkout. A fresh Yahoo request was rate-limited during review; a different provider or adjusted-price series would not establish reproduction of the original experiment.
 
-### Full comparison
+The code now scores SES forecasts **before updating with the observed value**. Moving-average windows are compared on a common set of training dates. These changes can alter selected parameters and held-out results. Unit tests validate these forecasting rules; they do not validate historical AAPL scores.
 
-| Year | Method | MAD | MAPE |
-|---|---|---:|---:|
-| 2023 | Naive | 31.56 | 17.62% |
-| 2023 | MA (n=2) | 32.20 | 17.98% |
-| 2023 | SES (α=0.9) | 31.66 | 17.67% |
-| 2023 | Linear Trend | 95.29 | 53.20% |
-| 2023 | Trend + Seasonal | 95.32 | 53.22% |
-| 2024 | Naive | 29.98 | 13.58% |
-| 2024 | MA (n=2) | 29.14 | 13.25% |
-| 2024 | SES (α=0.9) | 29.79 | 13.50% |
-| 2024 | Linear Trend | 35.75 | 17.42% |
-| 2024 | Trend + Seasonal | 35.78 | 17.44% |
+The report and presentation are archived coursework artifacts with superseded methods/results. They are retained as history, not current evidence. The original report credits Nikitas Valtadoros, David Frederick and Dimitrios Bechrakis; task-level ownership is not documented.
 
 ## Methodology
 
@@ -57,9 +43,9 @@ The trend and seasonal components are therefore estimated without access to futu
 
 ## Analytical takeaway
 
-The main insight is methodological rather than predictive: **model complexity did not guarantee better out-of-sample performance**.
+The experiment tests whether complexity improves held-out performance; the current ranking must be regenerated after the tuning corrections.
 
-With a very short training window, simple baselines provided the strongest results. This is a useful reminder that forecasting choices should be validated against a realistic holdout period rather than selected because the model appears more sophisticated.
+A very short training window makes simple baselines essential comparisons. This is a useful reminder that forecasting choices should be validated against a realistic holdout period rather than selected because the model appears more sophisticated.
 
 ## Reference-class adjustment
 

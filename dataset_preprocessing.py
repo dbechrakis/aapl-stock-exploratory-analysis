@@ -1,8 +1,9 @@
 from pathlib import Path
 import pandas as pd
 
-RAW_FILE = Path("data/raw/AAPL_daily_2023_2024_raw.csv")
-OUTPUT_DIR = Path("data/processed")
+ROOT = Path(__file__).resolve().parent
+RAW_FILE = ROOT / "data/raw/AAPL_daily_2023_2024_raw.csv"
+OUTPUT_DIR = ROOT / "data/processed"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -16,18 +17,23 @@ def main():
     df = pd.read_csv(RAW_FILE)
     df = df.dropna(how="all").copy()
 
-    # Normalize the expected source layout while keeping the preprocessing reproducible.
-    if len(df.columns) >= 6:
-        df = df.iloc[:, :6]
-        df.columns = ["Date", "Close", "High", "Low", "Open", "Volume"]
-    else:
-        raise ValueError("Expected at least six columns: Date, Close, High, Low, Open, Volume.")
+    # Named fields prevent silently treating Open or Adjusted Close as Close.
+    df.columns = [str(c).strip() for c in df.columns]
+    aliases = {"Close Price": "Close", "Price": "Close", "Close/Last": "Close"}
+    df = df.rename(columns={k: v for k, v in aliases.items() if k in df and "Close" not in df})
+    required = {"Date", "Close", "High", "Low", "Open", "Volume"}
+    if not required.issubset(df.columns):
+        raise ValueError(f"Expected named columns {sorted(required)}; got {list(df.columns)}")
+    if df.columns.duplicated().any():
+        raise ValueError("Duplicate column names in source data")
 
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     for col in ["Close", "High", "Low", "Open", "Volume"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.dropna(subset=["Date", "Close"]).sort_values("Date").reset_index(drop=True)
+    if df["Date"].duplicated().any():
+        raise ValueError("Duplicate trading dates in source data")
     forecast_df = df[["Date", "Close"]].rename(columns={"Close": "Price"})
 
     for year in [2023, 2024]:
